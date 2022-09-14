@@ -1,4 +1,3 @@
-from bytes import bytearray
 #[
   [func] -> {remEsc}:
   -> Remove all escape characters from a string while preserving escpos.
@@ -108,9 +107,3 @@ func mutateStr(str: var string; escRem: bool = false; mutations: varargs[array[0
             break
     
   return str
-
-#[
-var test: string = "\b\bHello,\n world!\b\b"
-echo test
-echo test.mutateStr(true)
-]#
