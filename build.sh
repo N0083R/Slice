@@ -81,7 +81,7 @@ setup
 source "$HOME/.bashrc"
 sleep 1.5
 
-install_slice() {
+__build_slice() {
     # check for valid .nim files in the current directory and build them using nim, then install the
     # binary to the proper location after changing its permissions
     if [[ $hasmusl -eq 1 ]] && [[ $hasnim -eq 1 ]]; then
@@ -123,4 +123,4 @@ install_slice() {
     fi
 }
 
-install_slice
+__build_slice
