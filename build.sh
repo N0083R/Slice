@@ -58,7 +58,7 @@ setup() {
             fi
 
         elif [ "$choice" = n ] || [ "$choice" = N ]; then
-            echo -e "\033[01;31mBuild Failed\033[00m!";
+            echo -e "\033[01;31mBuild Terminated By User\033[00m!";
             exit 1;
         fi
     fi
