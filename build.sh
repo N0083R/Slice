@@ -5,6 +5,7 @@ chromeos=0;
 isdebian=0;
 hasnim=0;
 hasmusl=0;
+hasupx=0;
 nimc=
 
 setup() {
@@ -75,6 +76,14 @@ setup() {
     else
         hasmusl=1;
     fi
+
+    # check if upx is iinstalled. If not then install it.
+    if [ ! -f "/usr/bin/upx" ]; then
+        sudo apt-get -y install upx
+        hasupx=1;
+    else
+        hasupx=1;
+    fi
 }
 
 setup
@@ -84,7 +93,7 @@ sleep 1.5
 __build_slice() {
     # check for valid .nim files in the current directory and build them using nim, then install the
     # binary to the proper location after changing its permissions
-    if [[ $hasmusl -eq 1 ]] && [[ $hasnim -eq 1 ]]; then
+    if [[ $hasmusl -eq 1 ]] && [[ $hasnim -eq 1 ]] && [[ $hasupx -eq 1 ]]; then
         compargs='--gcc.exe:musl-gcc --gcc.linkerexe:musl-gcc --passL:-static --passL:-s'
         nimargs='-d:release --threads:on --opt:size --os:linux --out:slice compile'
         nimc="nim ${compargs} ${nimargs}"
@@ -111,8 +120,8 @@ __build_slice() {
         sudo update-alternatives --install "/usr/bin/slice" slice "$HOME/.local/bin/slice" 1
         sleep 1;
 
-        echo -e "\n\033[01;32mInstall Complete\033[00m!";
-        sleep 1;
+        echo -e "\n\033[01;32mBuild Complete\033[00m!";
+        sleep 1.5;
 
         echo -e "Use '\033[01;35mslice -h\033[00m' or '\033[01;35mslice --help\033[00m' for usage information";
         exit 0;
