@@ -64,12 +64,16 @@ setup() {
     fi
 
     # check if musl is installed. If not then install it if the user chose to install nim
-    if [ ! -d "/usr/local/musl/bin/" ] && [ ! -f "/usr/local/musl/bin/musl-gcc" ] && [ ! -f "/usr/bin/musl-gcc" ] && [ -f "$PWD/deps/musl-1.2.3.tar.gz" ]; then
+    if [ ! -d "/usr/local/musl" ] && [ ! -f "/usr/local/musl/bin/musl-gcc" ] && [ ! -f "/usr/bin/musl-gcc" ] && [ -f "$PWD/deps/musl-1.2.3.tar.gz" ]; then
         sudo apt-get -y install build-essential &&\
             tar -xzvf "$PWD/deps/musl-1.2.3.tar.gz" && cd "$PWD/musl-1.2.3" && ./configure --prefix=/usr/local/musl && make -j4 && sudo make install &&\
             cd ..
         sudo rm --interactive=never -r "$PWD/musl-1.2.3/"
         echo -e '\n\n# musl-gcc path\nPATH=$PATH:/usr/local/musl/bin' >> "$HOME/.bashrc"
+        hasmusl=1;
+
+    else
+        hasmusl=1;
     fi
 }
 
