@@ -6,7 +6,7 @@
   [return] -> var string:
   -> Returns the mutated string if the removal succeeds, otherwise the original string is returned.
 ]#
-func remEsc*(data: var string): var string =
+func remEsc(data: var string): var string =
   var escpos, index: int64
   (escpos, index) = (0, 0)
 
@@ -51,7 +51,7 @@ func remEsc*(data: var string): var string =
  [return] -> var string:
  -> Returns the mutated string if the mutation(s) succeed, otherwise the original string is returned.
 ]#
-func mutateStr(str: var string; escRem: bool = false; mutations: varargs[array[0..1, string]]): var string =
+func mutateStr*(str: var string; escRem: bool = false; mutations: varargs[array[0..1, string]]): var string =
   var oldtarget: string
   var head, tail, dif, sum: int64
 
