@@ -3,6 +3,7 @@
 os=
 chromeos=0;
 isdebian=0;
+isfedora=0;
 hasnim=0;
 hasmusl=0;
 hasupx=0;
@@ -11,7 +12,7 @@ nimc=
 setup() {
 
     # check if OS is not Linux and exit if OS is not supported
-    if [ "$(uname -s)" = Linux ] || [ "$(uname -o)" = "GNU/Linux" ]; then
+    if [ "$(uname -s)" = Linux ] && [ "$(uname -o)" = "GNU/Linux" ]; then
         os='Linux'
     fi
 
@@ -28,8 +29,17 @@ setup() {
 
     # check if the OS is Linux and/or if it's Linux on ChromeOS and whether apt is present which
     # denotes OS is Debian based 
-    if [ "$os" = Linux ] || [[ $chromeos -eq 1 ]] && [ -f "/usr/bin/apt" ]; then
-        isdebian=1;
+    if [ "$os" = Linux ] || [[ $chromeos -eq 1 ]]; then
+        if [ -f "/usr/bin/apt" ]; then
+            isdebian=1;
+
+        elif [ -f "/usr/bin/dnf" ]; then
+            isfedora=1;
+
+        else
+            echo -en "Package manager not supported.";
+            exit;
+        fi
     fi
 
     # check if nim is installed, otherwise ask to install nim and cancel install if not
@@ -47,7 +57,11 @@ setup() {
 
             else
                 if [[ $isdebian -eq 1 ]] && [ ! -f "/usr/bin/curl" ]; then
-                        sudo apt-get -y install curl
+                        sudo apt-get -y install curl;
+
+                elif [[ $isfedora -eq 1 ]] && [ ! -f "/usr/bin/curl" ]; then
+                    sudo dnf -y install curl;
+
                 else
                     echo -e "sudo priviledges are needed to install curl";
                     exit 1;
@@ -65,8 +79,15 @@ setup() {
     fi
 
     # check if musl is installed. If not then install it if the user chose to install nim
-    if [ ! -d "/usr/local/musl" ] && [ ! -f "/usr/local/musl/bin/musl-gcc" ] && [ ! -f "/usr/bin/musl-gcc" ] && [ -f "$PWD/deps/musl-1.2.3.tar.gz" ]; then
+    if [ ! -d "/usr/local/musl" ] && [ ! -f "/usr/local/musl/bin/musl-gcc" ] && [ ! -f "/usr/bin/musl-gcc" ] && [ -f "$PWD/deps/musl-1.2.3.tar.gz" ] && [[ $isdebian -eq 1 ]]; then
         sudo apt-get -y install build-essential &&\
+            tar -xzvf "$PWD/deps/musl-1.2.3.tar.gz" && cd "$PWD/musl-1.2.3" && ./configure --prefix=/usr/local/musl && make -j4 && sudo make install &&\
+            cd ..
+        sudo rm --interactive=never -r "$PWD/musl-1.2.3/"
+        echo -e '\n\n# musl-gcc path\nPATH=$PATH:/usr/local/musl/bin' >> "$HOME/.bashrc"
+        hasmusl=1;
+
+    elif [ ! -d "/usr/local/musl" ] && [ ! -f "/usr/local/musl/bin/musl-gcc" ] && [ ! -f "/usr/bin/musl-gcc" ] && [ -f "$PWD/deps/musl-1.2.3.tar.gz" ] && [[ $isfedora -eq 1 ]]; then
             tar -xzvf "$PWD/deps/musl-1.2.3.tar.gz" && cd "$PWD/musl-1.2.3" && ./configure --prefix=/usr/local/musl && make -j4 && sudo make install &&\
             cd ..
         sudo rm --interactive=never -r "$PWD/musl-1.2.3/"
@@ -78,8 +99,12 @@ setup() {
     fi
 
     # check if upx is iinstalled. If not then install it.
-    if [ ! -f "/usr/bin/upx" ]; then
-        sudo apt-get -y install upx
+    if [ ! -f "/usr/bin/upx" ] && [[ $isdebian -eq 1 ]]; then
+        sudo apt-get -y install upx;
+        hasupx=1;
+
+    elif [ ! -f "/usr/bin/upx" ] && [[ $isfedora -eq 1 ]]; then
+        sudo dnf -y install upx;
         hasupx=1;
     else
         hasupx=1;
